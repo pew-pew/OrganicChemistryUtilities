@@ -1,6 +1,3 @@
-SPACES = True
-BRACKETS = True
-
 def readLines(file):
     fin = open(file)
     lines = fin.readlines()
@@ -76,7 +73,7 @@ def longestPath(atom, prev=None):
     maxPath.append(atom)
     return maxPath
 
-def getName(startAtom, prevAtom=None):
+def getName(startAtom, prevAtom=None, spaces=False, brackets=False):
     path = longestPath(startAtom, prevAtom)
     path = list(reversed(path))
     
@@ -88,7 +85,7 @@ def getName(startAtom, prevAtom=None):
         nextNb = path[i + 1] if i < len(path) - 1 else None
         for nb in curr.neighbours():
             if nb.getElement() != "H" and nb != prevNb and nb != nextNb:
-                name = getName(nb, curr)
+                name = getName(nb, curr, spaces, brackets)
                 if adds.get(name, None) == None:
                     adds[name] = []
                 adds[name].append(str(i + 1))
@@ -100,9 +97,9 @@ def getName(startAtom, prevAtom=None):
             modifer = getPrefixModifer(len(it[1]))
         else:
             modifer = ""
-        subName = modifer + (" " if SPACES and modifer else "") + it[0]
+        subName = modifer + (" " if spaces and modifer else "") + it[0]
         
-        if BRACKETS:
+        if brackets:
             name.append("[" + places + "]")
             name.append("(" + subName + ")")
         else:
