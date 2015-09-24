@@ -1,3 +1,5 @@
+import copy
+
 def readLines(file):
     fin = open(file)
     lines = fin.readlines()
@@ -43,8 +45,9 @@ class Atom:
         self._neighbours.add(other)
     
     def connect(self, other):
-        self._connect(other)
-        other._connect(self)
+        if other != self:
+            self._connect(other)
+            other._connect(self)
     
     def _disconnect(self, other):
         if other in self._neighbours:
@@ -53,6 +56,11 @@ class Atom:
     def disconnect(self, other):
         self._disconnect(other)
         other._disconnect(self)
+    
+    def disconnectAll(self):
+        oldAtoms = copy.copy(self._neighbours)
+        for atom in oldAtoms:
+            self.disconnect(atom)
     
     def isConnected(self, other):
         return other in self._neighbours
@@ -137,8 +145,8 @@ def parse(text):
                 atomMatrix[y - 1][x].connect(atomMatrix[y + 1][x])
     return firstAtom
 
-
-fin = open("input.txt", "r")
-text = fin.read()
-fin.close()
-print(getName(parse(text), spaces=False, brackets=False))
+if __name__ == "__main__":
+    fin = open("input.txt", "r")
+    text = fin.read()
+    fin.close()
+    print(getName(parse(text), spaces=False, brackets=False))
