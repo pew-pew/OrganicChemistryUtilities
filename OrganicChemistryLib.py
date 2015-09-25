@@ -1,4 +1,5 @@
 import copy
+import sys
 
 def readLines(file):
     fin = open(file)
@@ -67,6 +68,9 @@ class Atom:
     
     def neighbours(self):
         return self._neighbours
+    
+    def mark(self, x):
+        pass
 
 def longestPath(atom, prev=None):
     maxPath = []
@@ -81,31 +85,49 @@ def longestPath(atom, prev=None):
     maxPath.append(atom)
     return maxPath
 
-def _getName(startAtom, prevAtom=None, spaces=False, brackets=False):
+def _getName(startAtom, prevAtom=None, spaces=False, brackets=False, deep=0):
     path = longestPath(startAtom, prevAtom)
     path = list(reversed(path))
     
     adds = dict()
     
+    addsNames = ["я"] * len(path)
+    
     for i in range(len(path)):
         curr = path[i]
+        curr.mark(deep)
         prevNb = path[i - 1] if i > 0 else prevAtom
         nextNb = path[i + 1] if i < len(path) - 1 else None
         for nb in curr.neighbours():
             if nb.getElement() != "H" and nb != prevNb and nb != nextNb:
-                name = _getName(nb, curr, spaces, brackets)
+                name = _getName(nb, curr, spaces=spaces, brackets=brackets, deep=deep + 1)
                 if adds.get(name, None) == None:
                     adds[name] = []
-                adds[name].append(str(i + 1))
+                adds[name].append(i)
+                addsNames[i] = min(addsNames[i], name)
+    
+    reverse = False
+    for i in range(len(path)):
+        if addsNames[i] > addsNames[len(path) - i - 1]:
+            reverse = True
+            break
+        elif addsNames[i] < addsNames[len(path) - i - 1]:
+            break
     
     name = []
-    for it in adds.items():
-        places = " ".join(it[1])
-        if (len(it[1]) > 1):
-            modifer = getPrefixModifer(len(it[1]))
+    adds = list(adds.items())
+    adds.sort()
+    for add in adds:
+        addName = add[0]
+        places = [((len(path) - i - 1) if reverse else i) for i in add[1]]
+        
+        if (len(places) > 1):
+            modifer = getPrefixModifer(len(places))
         else:
             modifer = ""
-        subName = modifer + (" " if spaces and modifer else "") + it[0]
+        
+        subName = modifer + (" " if spaces and modifer else "") + addName
+        places = " ".join(map(lambda i: str(i + 1), places))
         
         if brackets:
             name.append("[" + places + "]")
@@ -118,6 +140,8 @@ def _getName(startAtom, prevAtom=None, spaces=False, brackets=False):
     return " ".join(name)
 
 def getName(atom, spaces=False, brackets=False):
+    if atom == None:
+        return ""
     subLast = longestPath(atom)[0]
     last = longestPath(subLast)[0]
     return _getName(last, spaces=spaces, brackets=brackets)

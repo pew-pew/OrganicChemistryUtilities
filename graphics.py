@@ -1,12 +1,16 @@
 import OrganicChemistryLib as OCL
 import tkinter as tk
 
+COLORS = "gray red green lightblueblue orange darkblue darkyellow".split(" ")
+
 class DrawableAtom(OCL.Atom):
     def __init__(self, element, x, y, r=10, name=None):
         self.x = x
         self.y = y
         self.r = r
         self.color = "black"
+        self._mark = 0
+        
         super().__init__(element, name=name)
     
     def draw(self, canvas):
@@ -18,6 +22,9 @@ class DrawableAtom(OCL.Atom):
     def drawConnections(self, canvas):
         for nb in self.neighbours():
             canvas.create_line(self.x, self.y, nb.x, nb.y, width=self.r // 10)
+    
+    def mark(self, m):
+        self._mark = m
 
 class Workspace:
     def __init__(self, root, width=400, height=400):
@@ -33,7 +40,7 @@ class Workspace:
         self.canvas.bind("<ButtonRelease-1>", self.onB1Release)
         self.canvas.bind("<B1-Motion>", self.onB1Motion)
         self.canvas.bind("<Button-3>", self.onB3Press)
-        self.canvas.bind("<Leave>", lambda ev: print(OCL.getName(list(self.atoms)[0])))
+        self.canvas.bind("<Button-2>", self.onB2Press)
         
         self.status = None
         self.statusData = None
@@ -48,6 +55,10 @@ class Workspace:
     def update(self):
         self.redraw()
     
+    def onB2Press(self, event):
+        print(OCL.getName(self.getAtomAt(event.x, event.y)))
+        self.update()
+        
     def onB3Press(self, event):
         atom = self.getAtomAt(event.x, event.y)
         if self.status == None and atom != None:
@@ -118,7 +129,7 @@ class Workspace:
     
 
 root = tk.Tk()
-ws = Workspace(root)
+ws = Workspace(root, width=700, height=700)
 ws.addAtom("C", 30, 30)
 ws.addAtom("C", 70, 30)
 ws.addAtom("C", 110, 30)
