@@ -69,7 +69,7 @@ class Atom:
     def neighbours(self):
         return self._neighbours
     
-    def mark(self, x):
+    def mark(self, name, depth):
         pass
 
 def longestPath(atom, prev=None):
@@ -85,7 +85,7 @@ def longestPath(atom, prev=None):
     maxPath.append(atom)
     return maxPath
 
-def _getName(startAtom, prevAtom=None, spaces=False, brackets=False, deep=0):
+def _getName(startAtom, prevAtom=None, spaces=False, brackets=False, depth=0):
     path = longestPath(startAtom, prevAtom)
     path = list(reversed(path))
     
@@ -95,12 +95,11 @@ def _getName(startAtom, prevAtom=None, spaces=False, brackets=False, deep=0):
     
     for i in range(len(path)):
         curr = path[i]
-        curr.mark(deep)
         prevNb = path[i - 1] if i > 0 else prevAtom
         nextNb = path[i + 1] if i < len(path) - 1 else None
         for nb in curr.neighbours():
             if nb.getElement() != "H" and nb != prevNb and nb != nextNb:
-                name = _getName(nb, curr, spaces=spaces, brackets=brackets, deep=deep + 1)
+                name = _getName(nb, curr, spaces=spaces, brackets=brackets, depth=depth + 1)
                 if adds.get(name, None) == None:
                     adds[name] = []
                 adds[name].append(i)
@@ -137,6 +136,10 @@ def _getName(startAtom, prevAtom=None, spaces=False, brackets=False, deep=0):
             name.append(subName)
     
     name.append(getPrefix(len(path)) + ("ил" if prevAtom != None else "ан"))
+    
+    for atom in path:
+        atom.mark(name, depth)
+    
     return " ".join(name)
 
 def getName(atom, spaces=False, brackets=False):

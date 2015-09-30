@@ -1,7 +1,7 @@
 import OrganicChemistryLib as OCL
 import tkinter as tk
 
-COLORS = "gray red green lightblueblue orange darkblue darkyellow".split(" ")
+C_COLORS = "#444444 gray white lightgreen green".split(" ")
 
 class DrawableAtom(OCL.Atom):
     def __init__(self, element, x, y, r=10, name=None):
@@ -9,13 +9,14 @@ class DrawableAtom(OCL.Atom):
         self.y = y
         self.r = r
         self.color = "black"
-        self._mark = 0
+        self._groupName = ""
+        self._depth = 0
         
         super().__init__(element, name=name)
     
     def draw(self, canvas):
         x, y, r = self.x, self.y, self.r
-        fill = "lightblue" if self.getElement() == "H" else "gray"
+        fill = "lightblue" if self.getElement() == "H" else C_COLORS[self._depth % len(C_COLORS)]
         canvas.create_oval(x - r, y - r, x + r, y + r, outline=self.color, fill=fill, width=self.r // 10)
         canvas.create_text(x, y, text=self.getElement(), font=("Times", self.r), fill=self.color)
     
@@ -23,8 +24,9 @@ class DrawableAtom(OCL.Atom):
         for nb in self.neighbours():
             canvas.create_line(self.x, self.y, nb.x, nb.y, width=self.r // 10)
     
-    def mark(self, m):
-        self._mark = m
+    def mark(self, name, depth):
+        self._groupName = name
+        self._depth = depth
 
 class Workspace:
     def __init__(self, root, width=400, height=400):
